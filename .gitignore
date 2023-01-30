@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+/packages/compact-select/lib/cjs
+/packages/compact-select/lib/esm/cache
+/packages/compact-select/lib/esm

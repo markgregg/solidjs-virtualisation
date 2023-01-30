@@ -1,0 +1,49 @@
+{
+  "name": "solidjs-virtualisation",
+  "version": "0.0.15",
+  "description": "Virtualised container for solidJs",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/esm/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "solid": "./dist/source/index.js",
+      "import": "./dist/esm/index.js",
+      "browser": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "node": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "prepack": "yarn build",
+    "build": "rollup -c",
+    "watch": "rollup -cw"
+  },
+  "keywords": [
+    "solidJs",
+    "virtualisation",
+    "virtual",
+    "Virtualised"
+  ],
+  "author": "Mark Gregg <gregg.mark@gmail.com> (https://github.com/markgregg)",
+  "license": "MIT",
+  "peerDependencies": {
+    "solid-js": "^1.6.9"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "prettier": "2.8.3",
+    "rollup": "^3.10.1",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-preset-solid": "^2.0.1",
+    "solid-js": "^1.6.9",
+    "typescript": "^4.9.4",
+    "vite": "^4.0.4",
+    "vite-plugin-solid": "^2.5.0"
+  }
+}

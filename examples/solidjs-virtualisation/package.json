@@ -1,0 +1,23 @@
+{
+  "name": "solidjs-virtualisation-example",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "2.8.3",
+    "relative-deps": "^1.0.7",
+    "typescript": "^4.9.4",
+    "vite": "^4.0.4",
+    "vite-plugin-solid": "^2.5.0"
+  },
+  "dependencies": {
+    "solid-js": "^1.6.9",
+    "solidjs-virtualisation": "0.0.12"
+  }
+}

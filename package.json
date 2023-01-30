@@ -1,0 +1,23 @@
+{
+  "name": "solidjs-virtualisation",
+  "private": true,
+  "description": "Virtualised container for solidJs",
+  "keywords": [],
+  "author": "Mark Gregg <gregg.mark@gmail.com> (https://github.com/markgregg)",
+  "workspaces": [
+    "examples/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "publish": "cd packages/solidjs-virtualisation && npm run build && npm publish",
+    "start-local": "cd examples/solidjs-virtualisation && npm run prepare && npm run start",
+    "start-live": "cd examples/solidjs-virtualisation && npm install solidjs-virtualisation@latest && npm run start",
+    "deploy": "cd examples/solidjs-virtualisation && npm run deploy",
+    "install": "cd packages/solidjs-virtualisation && npm install && cd ../../examples/solidjs-virtualisation && npm install"
+  },
+  "devDependencies": {
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

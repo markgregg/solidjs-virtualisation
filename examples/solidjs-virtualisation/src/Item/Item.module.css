@@ -1,0 +1,11 @@
+.item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: white;
+  background-color: darkblue;
+  border-radius: 5px;
+  width: 140px;
+  user-select: none;
+  -ms-user-select: none;
+}
