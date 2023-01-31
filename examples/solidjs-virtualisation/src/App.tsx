@@ -38,17 +38,8 @@ const App = () => {
       <p onClick={sizeChanged}>{size()} size (click to change)</p>
       <div style={contentStyle()}>
         <VirtualContainer
-          thumbColor="blue"
-          thumbHoverColor="darkblue"
           orientation={orientation()}
           items={items}
-          itemLength={
-            size() === 'Fixed'
-              ? orientation() === Horizontal
-                ? 140
-                : 40
-              : undefined
-          }
           render={(item) => (
             <Item
               index={item}
