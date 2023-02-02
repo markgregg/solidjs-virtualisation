@@ -7,16 +7,10 @@ import {
   JSX,
 } from 'solid-js';
 import { Orientation, Vertical } from '../types';
-import Scrollbar from '../Scrollbar';
+import Scrollbar, { ScrollBarRef } from '../ScrollBar';
 
-export interface VirtualContainerProps {
-  orientation: Orientation;
-  items: any[];
-  itemSize?: number;
-  render: (item: any, index: number) => JSXElement;
-  hideArrows?: boolean;
-  listSize?: number;
-  moveToItem?: number;
+export interface VirtualContainerRef {
+  scrollToItem: (item: number) => void;
 }
 
 interface Item {
@@ -24,10 +18,21 @@ interface Item {
   item: any;
 }
 
+export interface VirtualContainerProps {
+  ref?: VirtualContainerRef | ((ref: VirtualContainerRef) => void);
+  orientation: Orientation;
+  items: any[];
+  itemSize?: number;
+  render: (item: any, index: number) => JSXElement;
+  hideArrows?: boolean;
+  listSize?: number;
+}
+
 const VirtualContainer: Component<VirtualContainerProps> = (
   props: VirtualContainerProps
 ) => {
   let divRef: HTMLDivElement | undefined = undefined;
+  const [scrollBarRef,setScrollBarRef] = createSignal<ScrollBarRef>();
   const [position, setPosition] = createSignal<number>(0);
   const [wholeItemsPerPage, setWholeItemsPerPage] = createSignal<number>(0);
   const [visibleItems, setVisibleItems] = createSignal<Item[]>([]);
@@ -36,6 +41,33 @@ const VirtualContainer: Component<VirtualContainerProps> = (
 
   onMount(() => {
     initialise(props.orientation, props.items, itemSize());
+    if( props.ref ) {
+      const gridRef: VirtualContainerRef = {
+        scrollToItem: (item: number) => {
+          if( scrollBarRef() ) {
+            if (item < position()) {
+              scrollBarRef()?.scrollToItem(item);
+            } else if (item >= position() + wholeItemsPerPage() -1 ) {
+              if( item >= (props.items.length - wholeItemsPerPage() - 1) ) {
+                const newPosition = props.items.length - wholeItemsPerPage();
+                if( newPosition !== position() ) {
+                  scrollBarRef()?.scrollToItem(newPosition);
+                }
+              } else {
+                const newPosition = position() + (item - (position() + wholeItemsPerPage()-1));
+                scrollBarRef()?.scrollToItem(newPosition);
+              }
+            }
+          }
+        }
+      };
+      const callback = props.ref && (props.ref as (ref: VirtualContainerRef) => void);
+      if (callback) {
+        callback(gridRef);
+      } else {
+        props.ref = gridRef;
+      }
+    }
   });
 
   const updateItems = (start: number) => {
@@ -47,11 +79,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
           : divRef.clientWidth) ??
         0;
       const itemLength = itemSize() ?? 5;
-      const itemsPerPage =
-        Math.floor(viewport / (itemLength + 2)) +
-        (Math.floor(viewport / (itemLength + 2)) * (itemLength + 2) < viewport
-          ? 1
-          : 0);
+      const itemsPerPage = Math.floor(viewport / (itemLength + 2)) + 2;
       const newItems: Item[] = props.items
         .slice(start, start + itemsPerPage)
         .map((item, index) => {
@@ -73,7 +101,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
   ) => {
     if (divRef) {
       const viewport =
-        (props.orientation === Vertical
+        (orientation === Vertical
           ? divRef.clientHeight
           : divRef.clientWidth) ?? 0;
       if (itemSize && itemSize * items.length < viewport) {
@@ -88,7 +116,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
         : Math.floor((containerLength() ?? viewport) / (itemSize + 2));
       setWholeItemsPerPage(wholeItems);
       setTimeout(() => {
-        updateItems(0);
+        updateItems(position());
       }, 1);
     }
   };
@@ -102,22 +130,10 @@ const VirtualContainer: Component<VirtualContainerProps> = (
     updateItems(item);
   };
 
-  const getTargetItem = (item?: number): number | undefined => {
-    if (item === undefined) {
-      return;
-    }
-    if (item < position()) {
-      return item;
-    }
-    if (item > position() + wholeItemsPerPage()) {
-      return position() + (item - (position() + wholeItemsPerPage()));
-    }
-  };
-
   const setFirstElementRef = (ref: HTMLDivElement) => {
     setTimeout(() => {
       if( props.orientation === Vertical ) {
-        if( !props.itemSize && ref.clientHeight != 0 && ref.clientHeight != itemSize() ) {
+        if( ref.clientHeight != 0 && ref.clientHeight != itemSize() ) {
           setItemSize(ref.clientHeight)
         }
       } else {
@@ -125,21 +141,23 @@ const VirtualContainer: Component<VirtualContainerProps> = (
           setItemSize(ref.clientWidth)
         }
       }
-    }, 10);
+    }, 1);
   }
 
   const verticalItemListStyle: JSX.CSSProperties = {
     flex: '1',
     display: 'flex',
     'flex-direction': 'column',
-    'column-gap': '2px',
+    'row-gap': '2px',
+    'overflow': 'hidden'
   };
 
   const horizontalItemListStyle: JSX.CSSProperties = {
     flex: '1',
     display: 'flex',
     'flex-direction': 'row',
-    'row-gap': '2px',
+    'column-gap': '2px',
+    'overflow': 'hidden'
   };
 
   const verticalContainerStyle: JSX.CSSProperties = {
@@ -147,6 +165,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
     overflow: 'hidden',
     'flex-direction': 'row',
     height: '100%',
+    width: '100%'
   };
 
   const horizontalContainerStyle: JSX.CSSProperties = {
@@ -154,6 +173,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
     overflow: 'hidden',
     'flex-direction': 'column',
     width: '100%',
+    height: '100%'
   };
 
   const containerStyle = (
@@ -164,9 +184,11 @@ const VirtualContainer: Component<VirtualContainerProps> = (
     return orientation === Vertical
       ? {
           height: containerSize ? `${length ?? containerSize}px` : '100%',
+          width: '100%'
         }
       : {
           width: containerSize ? `${length ?? containerSize}px` : '100%',
+          height: '100%'
         };
   };
 
@@ -200,7 +222,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
         </div>
         {!containerLength() && (
           <Scrollbar
-            moveToItem={getTargetItem(props.moveToItem)}
+            ref={setScrollBarRef}
             orientation={props.orientation}
             itemCount={props.items.length}
             itemsPerPage={wholeItemsPerPage()}

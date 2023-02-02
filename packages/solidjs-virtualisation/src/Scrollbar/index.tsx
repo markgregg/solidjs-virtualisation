@@ -8,15 +8,19 @@ import {
   JSX,
 } from 'solid-js';
 import { Horizontal, Orientation, Vertical } from '../types';
+                    
+export interface ScrollBarRef {
+  scrollToItem: (item: number) => void;
+}
 
-export interface ScollbarProps {
+export interface ScollBarProps {
+  ref?: ScrollBarRef | ((ref: ScrollBarRef) => void);
   orientation: Orientation;
   itemCount: number;
   itemsPerPage?: number;
   onScroll: (item: number) => void;
   width?: string;
   hideArrows?: boolean;
-  moveToItem?: number;
 }
 
 interface ScrollbarState {
@@ -29,21 +33,27 @@ interface ScrollbarState {
   timer?: number;
   repeatingTimeInterval?: number;
   lastPropPosition?: number;
+  orientation: Orientation;
+  itemCount: number;
+  itemsPerPage?: number;
 }
 
-const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
-  const width = props.width ?? 20;
-  const barLength = props.hideArrows ? 0 : 15;
-  const barLengths = props.hideArrows ? 0 : 30;
+const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
+  const arrowLength = 15;
+  const arrowLengthAndSpace = 17;
+  const barLength = props.hideArrows ? 0 : arrowLengthAndSpace;
+  const barLengths = props.hideArrows ? 0 : arrowLengthAndSpace * 2;
   let canvasRef: HTMLCanvasElement | undefined = undefined;
   const state = createMemo<ScrollbarState>(() => {
     return {
-      position: props.hideArrows ? 0 : 15,
+      position: props.hideArrows ? 0 : arrowLengthAndSpace,
       item: 1,
       thumbSize: 0,
       itemsPerThumb: 0,
       tracking: false,
       hover: 'None',
+      orientation: Vertical,
+      itemCount: 0
     };
   });
   const [refresh, setRefresh] = createSignal<number>(0);
@@ -52,8 +62,23 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
     document.addEventListener('mousedown', handleMouseDown, true);
     document.addEventListener('mouseup', handleMouseUp, true);
     document.addEventListener('mousemove', handleMouseMove, true);
-    initialiseCanvas();
-    setRefresh(performance.now());
+    if( props.ref ) {
+      const gridRef: ScrollBarRef = {
+        scrollToItem: (item: number) => {
+          if (canvasRef) {
+            if( item !== state().item ) { 
+              scrollToItem(item, canvasRef.height, canvasRef.width);
+            }
+          }
+        }
+      };
+      const callback = props.ref && (props.ref as (ref: ScrollBarRef) => void);
+      if (callback) {
+        callback(gridRef);
+      } else {
+        props.ref = gridRef;
+      }
+    }
   });
 
   onCleanup(async () => {
@@ -66,8 +91,7 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
     if (canvasRef) {
       canvasRef.height = canvasRef.clientHeight;
       canvasRef.width = canvasRef.clientWidth;
-      const length =
-        props.orientation === Vertical ? canvasRef.height : canvasRef.width;
+      const length = props.orientation === Vertical ? canvasRef.height : canvasRef.width;
       state().thumbSize =
         Math.floor(
           (length - barLengths) / (props.itemCount - (props.itemsPerPage ?? 1))
@@ -84,23 +108,30 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
   };
 
   createEffect(() => {
-    state().item = 1;
-    const refresh = props.orientation + props.itemCount + props.itemsPerPage;
-    setTimeout(() => {
-      initialiseCanvas();
-      setRefresh(performance.now());
-    }),
-      1;
+    if( props.orientation !== state().orientation ||
+      props.itemCount !== state().itemCount ||
+      props.itemsPerPage !== state().itemsPerPage) {
+      state().orientation = props.orientation;
+      state().itemCount = props.itemCount;
+      state().itemsPerPage = props.itemsPerPage;
+      setTimeout(() => {
+        initialiseCanvas();
+        setRefresh(performance.now());
+
+        //if visible item is no longer valid adjust
+        if( state().item >= props.itemCount ) {
+          setTimeout(() => {
+            if( canvasRef ) {
+              scrollToItem(props.itemCount-1, canvasRef.height, canvasRef.width);
+            }
+          }, 1);
+        }
+      }, 1);
+    }
   });
 
   createEffect(() => {
     drawScrollBar(refresh());
-  });
-
-  createEffect(() => {
-    if (canvasRef && props.moveToItem !== undefined) {
-      scrollToItem(props.moveToItem, canvasRef.height, canvasRef.width);
-    }
   });
 
   const repeat = (action: () => boolean) => {
@@ -195,8 +226,8 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
     w: number
   ): boolean => {
     return (
-      (props.orientation === Vertical && y > 0 && y <= 15 && x > 0 && x < w) ||
-      (props.orientation === Horizontal && x > 0 && x <= 15 && y > 0 && y < h)
+      (props.orientation === Vertical && y > 0 && y <= arrowLengthAndSpace && x > 0 && x < w) ||
+      (props.orientation === Horizontal && x > 0 && x <= arrowLengthAndSpace && y > 0 && y < h)
     );
   };
 
@@ -209,12 +240,12 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
     return (
       (props.orientation === Vertical &&
         y < h &&
-        y >= h - 15 &&
+        y >= h - arrowLengthAndSpace &&
         x > 0 &&
         x < w) ||
       (props.orientation === Horizontal &&
         x < w &&
-        x >= w - 15 &&
+        x >= w - arrowLengthAndSpace &&
         y > 0 &&
         y < h)
     );
@@ -306,13 +337,15 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
           hovering = true;
         } else if (
           !props.hideArrows &&
-          isPointInMoveUp(x, y, canvasRef.clientHeight, canvasRef.clientWidth)
+          isPointInMoveUp(x, y, canvasRef.clientHeight, canvasRef.clientWidth) &&
+          state().item > 0
         ) {
           state().hover = 'Up';
           hovering = true;
         } else if (
           !props.hideArrows &&
-          isPointInMoveDown(x, y, canvasRef.clientHeight, canvasRef.clientWidth)
+          isPointInMoveDown(x, y, canvasRef.clientHeight, canvasRef.clientWidth) &&
+          state().item < props.itemCount - (props.itemsPerPage ?? 1)
         ) {
           state().hover = 'Down';
           hovering = true;
@@ -340,7 +373,7 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
       const context = canvasRef.getContext('2d');
 
       if (context) {
-        const scrollbarColor = getCSSVariable('--scrollbarColor') ?? '#d3d3d3';
+        const scrollbarColor = getCSSVariable('--scrollbarColor') ?? 'white';
         const scrollbarArrowColor =
           getCSSVariable('--scrollbarArrowColor') ?? '#6f6e6e';
         const scrollbarArrowHoverColor =
@@ -348,11 +381,11 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
         const scrollbarArrowHoverBackground =
           getCSSVariable('--scrollbarArrowHoverBackground') ?? '#a9a9a9';
         const scrollbarThumbColor =
-          getCSSVariable('--scrollbarThumbColor') ?? '#6f6e6e';
+          getCSSVariable('--scrollbarThumbColor') ?? '#a9a9a9';
         const scrollbarThumbHoverColor =
-          getCSSVariable('--scrollbarThumbHoverColor') ?? '#a9a9a9';
+          getCSSVariable('--scrollbarThumbHoverColor') ?? '#6f6e6e';
 
-        //draw outline
+        //scroll bar
         context.fillStyle = scrollbarColor;
         context.fillRect(0, 0, canvasRef.clientWidth, canvasRef.height);
 
@@ -363,16 +396,16 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
             : scrollbarThumbColor;
         if (props.orientation === Vertical) {
           context.fillRect(
-            0,
+            2,
             state().position,
-            canvasRef.clientWidth,
+            canvasRef.clientWidth-4,
             state().thumbSize
           );
         } else {
           context.fillRect(
             state().position,
-            0,
-            state().thumbSize,
+            2,
+            state().thumbSize-4,
             canvasRef.clientHeight
           );
         }
@@ -381,9 +414,9 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
           if (state().hover === 'Up') {
             context.fillStyle = scrollbarArrowHoverBackground;
             if (props.orientation === Vertical) {
-              context.fillRect(0, 0, canvasRef.clientWidth, 15);
+              context.fillRect(0, 0, canvasRef.clientWidth, arrowLength);
             } else {
-              context.fillRect(0, 0, 15, canvasRef.clientHeight);
+              context.fillRect(0, 0, arrowLength, canvasRef.clientHeight);
             }
           }
         }
@@ -394,13 +427,13 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
             if (props.orientation === Vertical) {
               context.fillRect(
                 0,
-                canvasRef.clientHeight - 15,
+                canvasRef.clientHeight - arrowLength,
                 canvasRef.clientWidth,
                 canvasRef.clientHeight
               );
             } else {
               context.fillRect(
-                canvasRef.clientWidth - 15,
+                canvasRef.clientWidth - arrowLength,
                 0,
                 canvasRef.clientWidth,
                 canvasRef.clientHeight
@@ -413,26 +446,26 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
           context.beginPath();
           if (props.orientation === Vertical) {
             context.moveTo(canvasRef.clientWidth / 2, 5);
-            context.lineTo(canvasRef.clientWidth / 2 + 5, 10);
-            context.lineTo(canvasRef.clientWidth / 2 - 5, 10);
+            context.lineTo(canvasRef.clientWidth / 2 + 3, 10);
+            context.lineTo(canvasRef.clientWidth / 2 - 3, 10);
           } else {
             context.moveTo(5, canvasRef.clientHeight / 2);
-            context.lineTo(10, canvasRef.clientHeight / 2 + 5);
-            context.lineTo(10, canvasRef.clientHeight / 2 - 5);
+            context.lineTo(10, canvasRef.clientHeight / 2 + 3);
+            context.lineTo(10, canvasRef.clientHeight / 2 - 3);
           }
           context.closePath();
 
           // the outline
           context.lineWidth = 1;
           context.strokeStyle =
-            state().hover === 'Down'
+            state().hover === 'Up'
               ? scrollbarArrowHoverColor
               : scrollbarArrowColor;
           context.stroke();
 
           // the fill color
           context.fillStyle =
-            state().hover === 'Down'
+            state().hover === 'Up'
               ? scrollbarArrowHoverColor
               : scrollbarArrowColor;
           context.fill();
@@ -444,11 +477,11 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
               canvasRef.clientHeight - 5
             );
             context.lineTo(
-              canvasRef.clientWidth / 2 + 5,
+              canvasRef.clientWidth / 2 + 3,
               canvasRef.clientHeight - 10
             );
             context.lineTo(
-              canvasRef.clientWidth / 2 - 5,
+              canvasRef.clientWidth / 2 - 3,
               canvasRef.clientHeight - 10
             );
           } else {
@@ -458,11 +491,11 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
             );
             context.lineTo(
               canvasRef.clientWidth - 10,
-              canvasRef.clientHeight / 2 + 5
+              canvasRef.clientHeight / 2 + 3
             );
             context.lineTo(
               canvasRef.clientWidth - 10,
-              canvasRef.clientHeight / 2 - 5
+              canvasRef.clientHeight / 2 - 3
             );
           }
           context.closePath();
@@ -504,4 +537,4 @@ const Scollbar: Component<ScollbarProps> = (props: ScollbarProps) => {
   );
 };
 
-export default Scollbar;
+export default ScollBar;
