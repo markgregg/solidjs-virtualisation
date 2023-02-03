@@ -104,11 +104,11 @@ const VirtualContainer: Component<VirtualContainerProps> = (
         (orientation === Vertical
           ? divRef.clientHeight
           : divRef.clientWidth) ?? 0;
-      if (itemSize && itemSize * items.length < viewport) {
-        setContainerLength(itemSize * items.length);
+      if (itemSize && (itemSize+2) * items.length < viewport) {
+        setContainerLength((itemSize+2) * items.length);
       }
       const length = containerLength();
-      if (length && itemSize && itemSize * items.length > length) {
+      if (length && itemSize && (itemSize+2) * items.length > length) {
         setContainerLength(undefined);
       }
       const wholeItems = !itemSize

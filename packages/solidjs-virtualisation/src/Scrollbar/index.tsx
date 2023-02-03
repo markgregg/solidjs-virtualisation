@@ -135,13 +135,13 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
   });
 
   const repeat = (action: () => boolean) => {
-    state().repeatingTimeInterval = 100;
+    state().repeatingTimeInterval = 200;
     const runAction = () => {
       if (action()) {
         const repeatingTimeInterval = state().repeatingTimeInterval;
         if (repeatingTimeInterval) {
           state().repeatingTimeInterval =
-            repeatingTimeInterval > 10 ? repeatingTimeInterval - 10 : 10;
+            repeatingTimeInterval > 5 ? repeatingTimeInterval - 5 : 5;
           setTimeout(runAction, repeatingTimeInterval);
         }
       }
