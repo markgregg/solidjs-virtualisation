@@ -21,6 +21,7 @@ export interface ScollBarProps {
   onScroll: (item: number) => void;
   width?: string;
   hideArrows?: boolean;
+  onTracking?: (tracking: boolean) => void;
 }
 
 interface ScrollbarState {
@@ -47,7 +48,7 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
   const state = createMemo<ScrollbarState>(() => {
     return {
       position: props.hideArrows ? 0 : arrowLengthAndSpace,
-      item: 1,
+      item: 0,
       thumbSize: 0,
       itemsPerThumb: 0,
       tracking: false,
@@ -66,7 +67,9 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
       const gridRef: ScrollBarRef = {
         scrollToItem: (item: number) => {
           if (canvasRef) {
+            console.log(`${state().item} =  ${item}`)
             if( item !== state().item ) { 
+              console.log(`scrolling to ${item}`)
               scrollToItem(item, canvasRef.height, canvasRef.width);
             }
           }
@@ -94,12 +97,12 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
       const length = props.orientation === Vertical ? canvasRef.height : canvasRef.width;
       state().thumbSize =
         Math.floor(
-          (length - barLengths) / (props.itemCount - (props.itemsPerPage ?? 1))
+          (length - barLengths) / ((props.itemCount - (props.itemsPerPage ?? 1))+1)
         ) < 10
           ? 10
           : Math.floor(
               (length - barLengths) /
-                (props.itemCount - (props.itemsPerPage ?? 1))
+                ((props.itemCount - (props.itemsPerPage ?? 1))+ 1)
             );
       state().itemsPerThumb =
         (props.itemCount - (props.itemsPerPage ?? 1)) /
@@ -180,7 +183,6 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
         });
         event.preventDefault();
         event.stopImmediatePropagation();
-        event.stopPropagation();
       } else if (
         !props.hideArrows &&
         isPointInMoveDown(x, y, canvasRef.clientHeight, canvasRef.clientWidth)
@@ -194,15 +196,16 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
         });
         event.preventDefault();
         event.stopImmediatePropagation();
-        event.stopPropagation();
       } else if (
         event.target !== null &&
         canvasRef.contains(event.target as Node) === true
       ) {
         state().tracking = true;
+        if( props.onTracking ) {
+          props.onTracking(true);
+        }
         event.preventDefault();
         event.stopImmediatePropagation();
-        event.stopPropagation();
       }
     }
   };
@@ -210,11 +213,18 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
   const handleMouseUp = (event: MouseEvent) => {
     if (state().tracking) {
       handleMouseMove(event);
-      event.stopPropagation();
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setTimeout(() => {
+        if( props.onTracking ) {
+          props.onTracking(false);
+        }
+      }, 10)
     }
     if (state().repeatingTimeInterval) {
       state().repeatingTimeInterval = undefined;
-      event.stopPropagation();
+      event.preventDefault();
+      event.stopImmediatePropagation();
     }
     state().tracking = false;
   };
@@ -325,7 +335,6 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
         }
         event.preventDefault();
         event.stopImmediatePropagation();
-        event.stopPropagation();
       } else {
         const y = event.clientY - canvasRef.getClientRects()[0].top;
         const x = event.clientX - canvasRef.getClientRects()[0].left;
@@ -352,7 +361,8 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
         }
         if (hovering) {
           setRefresh(performance.now());
-          event.stopPropagation();
+          event.preventDefault();
+          event.stopImmediatePropagation();
           return;
         }
       }

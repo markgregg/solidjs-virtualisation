@@ -26,6 +26,7 @@ export interface VirtualContainerProps {
   render: (item: any, index: number) => JSXElement;
   hideArrows?: boolean;
   listSize?: number;
+  onTracking?: (tracking: boolean) => void;
 }
 
 const VirtualContainer: Component<VirtualContainerProps> = (
@@ -48,8 +49,10 @@ const VirtualContainer: Component<VirtualContainerProps> = (
             if (item < position()) {
               scrollBarRef()?.scrollToItem(item);
             } else if (item >= position() + wholeItemsPerPage() -1 ) {
+              console.log("showing")
               if( item >= (props.items.length - wholeItemsPerPage() - 1) ) {
                 const newPosition = props.items.length - wholeItemsPerPage();
+                console.log(`To ${newPosition}`)
                 if( newPosition !== position() ) {
                   scrollBarRef()?.scrollToItem(newPosition);
                 }
@@ -228,6 +231,11 @@ const VirtualContainer: Component<VirtualContainerProps> = (
             itemsPerPage={wholeItemsPerPage()}
             onScroll={handleScroll}
             hideArrows={props.hideArrows}
+            onTracking={ tracking => {
+              if( props.onTracking ) {
+                props.onTracking(tracking);
+              }
+            }}
           />
         )}
       </div>
