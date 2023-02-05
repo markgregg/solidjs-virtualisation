@@ -20,8 +20,5 @@
   "dependencies": {
     "solid-js": "^1.6.9",
     "solidjs-virtualisation": "0.0.21"
-  },
-  "relativeDependencies": {
-    "compact-select": "../../packages/solidjs-virtualisation"
   }
 }

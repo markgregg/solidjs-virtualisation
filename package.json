@@ -16,8 +16,6 @@
     "install": "cd packages/solidjs-virtualisation && npm install && cd ../../examples/solidjs-virtualisation && npm install"
   },
   "devDependencies": {
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "prettier": "^2.5.1"
   }
 }
