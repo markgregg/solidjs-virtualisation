@@ -67,9 +67,7 @@ const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
       const gridRef: ScrollBarRef = {
         scrollToItem: (item: number) => {
           if (canvasRef) {
-            console.log(`${state().item} =  ${item}`)
             if( item !== state().item ) { 
-              console.log(`scrolling to ${item}`)
               scrollToItem(item, canvasRef.height, canvasRef.width);
             }
           }

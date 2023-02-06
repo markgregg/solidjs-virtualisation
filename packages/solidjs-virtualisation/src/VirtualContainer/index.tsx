@@ -49,10 +49,8 @@ const VirtualContainer: Component<VirtualContainerProps> = (
             if (item < position()) {
               scrollBarRef()?.scrollToItem(item);
             } else if (item >= position() + wholeItemsPerPage() -1 ) {
-              console.log("showing")
               if( item >= (props.items.length - wholeItemsPerPage() - 1) ) {
                 const newPosition = props.items.length - wholeItemsPerPage();
-                console.log(`To ${newPosition}`)
                 if( newPosition !== position() ) {
                   scrollBarRef()?.scrollToItem(newPosition);
                 }
