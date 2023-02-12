@@ -36,7 +36,7 @@ const App = () => {
           <div class="heading">
             <h1 class="title">SolidJs-Select</h1>
             <p class="statement">
-              A compact, highly functional select control for SolidJs
+              A virtualisating container for Solidjs
             </p>
           </div>
           <div class="menu-bar">
