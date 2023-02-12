@@ -1,53 +1,86 @@
-import { Component, createSignal, JSX } from 'solid-js';
-import styles from './App.module.css';
-import Item from './Item';
-import VirtualContainer from 'solidjs-virtualisation';
-import { Horizontal, Orientation, Vertical } from './types';
+import SolidJsSelect from "solidjs-select";
+import VirtualisationExample from './VirtualisationExample';
+import './App.css';
+import { applyTheme, themes, Themes } from './themes/themes';
+import { createSignal, onMount } from 'solid-js';
 
-const items: number[] = [];
-for (let index = 1; index <= 1000000; index++) {
-  items.push(index);
-}
+const pages = ['Example', 'More Demos'];
 
 const App = () => {
-  const [orientation, setHorizontal] = createSignal<Orientation>(Vertical);
-  const [size, setSize] = createSignal<'Fixed' | 'Variable'>('Fixed');
+  const [themeName, setThemeName] = createSignal<string>(
+    Themes.Plain.toString()
+  );
+  const [page, setPage] = createSignal<string>('Example');
 
-  const orientationChanged = () => {
-    setHorizontal(orientation() === Vertical ? Horizontal : Vertical);
+  onMount(() => {
+    applyTheme(Themes.Plain);
+  });
+
+  const setTheme = (theme: string[]) => {
+    setThemeName(theme[0]);
+    applyTheme(theme[0]);
   };
 
-  const sizeChanged = () => {
-    setSize(size() === 'Fixed' ? 'Variable' : 'Fixed');
-  };
-
-  const contentStyle = () =>
-    orientation() === Horizontal
-      ? {
-          width: '400px',
-        }
-      : {
-          height: '400px',
-        };
+  const openPage = (page: string) => {
+    if( page === 'More Demos') {
+      window.location.href = "https://markgregg.github.io/demo-home/"; 
+    } else {
+      setPage(page);
+    } 
+  }
 
   return (
-    <div class={styles.app}>
-      <p onClick={orientationChanged}>
-        {orientation()} orientation (click to change)
-      </p>
-      <p onClick={sizeChanged}>{size()} size (click to change)</p>
-      <div style={contentStyle()}>
-        <VirtualContainer
-          orientation={orientation()}
-          items={items}
-          render={(item) => (
-            <Item
-              index={item}
-              orientation={orientation()}
-              variableHeight={size() === 'Variable'}
-            />
-          )}
-        />
+    <div class="frame">
+      <div class="page">
+        <div class='header'>
+          <div class="heading">
+            <h1 class="title">SolidJs-Select</h1>
+            <p class="statement">
+              A compact, highly functional select control for SolidJs
+            </p>
+          </div>
+          <div class="menu-bar">
+            <div class="menu">
+              {pages.map((pg) => (
+                <div class="menu-item" onClick={() => openPage(pg)}>
+                  {
+                    ( pg === page()) 
+                    ? <u><p class="menu-text">{pg}</p></u>
+                    : <p class="menu-text">{pg}</p> 
+                  }
+                </div>
+              ))}
+            </div>
+            <div class="theme">
+              <SolidJsSelect
+                maximumSelections={1}
+                minimumSelections={1}
+                selectType="dropdown"
+                title="themes"
+                choices={themes}
+                selected={themeName()}
+                onChange={setTheme}
+              />
+            </div>
+          </div>
+
+        </div>
+        <div class="body">
+          <div class="context">
+            {
+              (page() === 'Example' && <VirtualisationExample theme={themeName()} />)
+            }
+          </div>
+          <div
+            class="footer"
+            style={{
+              'background-color': 'var(--pageColor2)',
+              color: 'var(--solidjsSelectFontColor)',
+            }}
+          >
+            <p class="no-padding">Created by Mark Gregg</p>
+          </div>
+        </div>
       </div>
     </div>
   );

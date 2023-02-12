@@ -1,35 +1,48 @@
 import type { Component } from 'solid-js';
-import { Horizontal, Orientation, Vertical } from '../types';
-import styles from './Item.module.css';
+import { Orientation } from "solidjs-virtualisation";
+import './Item.css';
 
 export interface ItemProps {
   index: number;
   orientation: Orientation;
-  variableHeight: boolean;
+  variableSize: boolean;
 }
 const Item: Component<ItemProps> = (props: ItemProps) => {
-  const getHeight = () => {
-    return props.variableHeight && props.orientation === Vertical
-      ? 40 + (props.index % 5) * 10
+
+  const itemStyle = (orientation: Orientation) => {
+    return orientation === 'Horizontal'
+      ? {
+        height: '40px',
+      }
+      : {
+        width: '170px'
+      }
+  };
+
+
+  const getImageHeight = (variableSize: boolean, orientation: Orientation, index: number) => {
+    return variableSize && orientation === 'Vertical'
+      ? 40 + (index % 5) * 10
       : '40px';
   };
 
-  const getWidth = () => {
-    return props.variableHeight && props.orientation === Horizontal
-      ? 40 + (props.index % 5) * 10
+  const getImageWidth = (variableSize: boolean, orientation: Orientation, index: number) => {
+    return variableSize && orientation === 'Horizontal'
+      ? 40 + (index % 5) * 10
       : '40px';
   };
 
   return (
-    <div class={styles.item}>
+    <div class="item"
+      style={itemStyle(props.orientation)}
+    >
       <img
-        class={styles.image}
-        height={getHeight()}
-        width={getWidth()}
+        height={getImageHeight(props.variableSize, props.orientation, props.index)}
+        width={getImageWidth(props.variableSize, props.orientation, props.index)}
         alt={props.index.toString()}
         src={`https://picsum.photos/id/${(props.index % 10) + 1}/200/300`}
       />
-      <pre>Item {props.index}</pre>
+      <pre>Item {props.index.toLocaleString()}</pre>
     </div>
   );
 };
