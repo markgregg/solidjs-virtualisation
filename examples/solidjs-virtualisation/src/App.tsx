@@ -4,7 +4,7 @@ import './App.css';
 import { applyTheme, themes, Themes } from './themes/themes';
 import { createSignal, onMount } from 'solid-js';
 
-const pages = ['Example', 'More Demos'];
+const pages = ['Example', 'Back To Demos'];
 
 const App = () => {
   const [themeName, setThemeName] = createSignal<string>(
@@ -22,7 +22,7 @@ const App = () => {
   };
 
   const openPage = (page: string) => {
-    if( page === 'More Demos') {
+    if( page === 'Back To Demos') {
       window.location.href = "https://markgregg.github.io/demo-home/"; 
     } else {
       setPage(page);
@@ -34,7 +34,7 @@ const App = () => {
       <div class="page">
         <div class='header'>
           <div class="heading">
-            <h1 class="title">SolidJs-Select</h1>
+            <h1 class="title">SolidJs-Virtualisation</h1>
             <p class="statement">
               A virtualisating container for Solidjs
             </p>
