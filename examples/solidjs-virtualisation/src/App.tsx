@@ -60,12 +60,22 @@ const App = () => {
                 choices={themes}
                 selected={themeName()}
                 onChange={setTheme}
+                hideDivider
               />
             </div>
           </div>
 
         </div>
-        <div class="body">
+        <div 
+          class={ "body" + (themeName()===Themes.Dark 
+            ? " dark"
+            : themeName()===Themes.Light
+              ? " light"
+              : themeName()===Themes.Blue
+              ? " blue"
+              : " plain")
+          }
+        >
           <div class="context">
             {
               (page() === 'Example' && <VirtualisationExample theme={themeName()} />)

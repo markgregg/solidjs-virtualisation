@@ -33,6 +33,22 @@
   color: var(--pageFont);
 }
 
+.plain {
+  background: url(/src/assets/plain.jpg) no-repeat center center fixed;
+}
+
+.dark {
+  background: url(/src/assets/dark.jpg) no-repeat center center fixed;
+}
+
+.light {
+  background: url(/src/assets/light.jpg) no-repeat center center fixed;
+}
+
+.blue {
+  background: url(/src/assets/blue.jpg) no-repeat center center fixed;
+}
+
 .heading {
   display: flex;
   flex-direction: column;
@@ -62,7 +78,7 @@
   padding-top: 15px;
   padding-bottom: 15px;
   border-radius: 8px;
-  background-color: var(--pageColor2);
+  background-image: linear-gradient(to right, var(--pageColor3), var(--pageColor2));
   box-shadow: 6px 6px var(--pageColor4);
 }
 
@@ -100,9 +116,11 @@
   width: 60px;
   display: block;
   align-self: flex-end;
+  --solidjsSelectDropDownBackgroundColor: none;
   --solidjsSelectBorder: none;
   --solidjsSelectBackgroundColor: var(--pageColor2);
   --solidjsSelectHighlightedBackgroundColor: var(--pageColor3);
+  --solidjsSelectBackgroundImage: none;
 }
 
 .clipboardCopy {
@@ -116,6 +134,8 @@
   border-radius: 8px;
   box-shadow: 6px 6px var(--pageColor4);
   padding: 15px;
+  background-image: linear-gradient(to right, var(--pageColor3), var(--pageColor2));
+  color: 'var(--solidjsSelectFontColor)';
 }
 
 .no-padding {
