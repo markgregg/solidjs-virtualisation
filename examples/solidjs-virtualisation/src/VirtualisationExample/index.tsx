@@ -50,17 +50,6 @@ const VirtualisationExample: Component<VirtualisationExampleProps> = (
     setSize(size() === 'Fixed' ? 'Variable' : 'Fixed');
   };
 
-  const contentStyle = () =>
-    orientation() === 'Horizontal'
-      ? {
-          width: '500px',
-          height: "80px"
-        }
-      : {
-          height: '400px',
-          "width": "200px"
-        };
-
   return (
     <div class='main'>
       <p>SolidJs is fast, because rather than keeping a virtual DOM, it only updates elements in response to a reaction. 
@@ -87,7 +76,7 @@ const VirtualisationExample: Component<VirtualisationExampleProps> = (
         </div>
       </div>
       <div class='containerCenter'>
-        <div style={contentStyle()}>
+        <div class={ orientation() === 'Horizontal' ? 'contentHorizontal' : 'contentVertical'}>
           <VirtualContainer
             orientation={orientation()}
             items={items()}

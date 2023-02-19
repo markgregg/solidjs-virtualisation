@@ -4,7 +4,7 @@ import './App.css';
 import { applyTheme, themes, Themes } from './themes/themes';
 import { createSignal, onMount } from 'solid-js';
 
-const pages = ['Example', 'Back To Demos'];
+const pages = ['Example', 'More Demos'];
 
 const App = () => {
   const [themeName, setThemeName] = createSignal<string>(
@@ -22,34 +22,46 @@ const App = () => {
   };
 
   const openPage = (page: string) => {
-    if( page === 'Back To Demos') {
+    if( page === 'More Demos') {
       window.location.href = "https://markgregg.github.io/demo-home/"; 
     } else {
       setPage(page);
     } 
   }
 
+  console.log(themeName())
   return (
     <div class="frame">
-      <div class="page">
+      <div 
+        class={ "page" + (themeName()===Themes.Dark 
+          ? " dark"
+          : themeName()===Themes.Light
+            ? " light"
+            : themeName()===Themes.Blue
+            ? " blue"
+            : " plain")
+        }
+      >
         <div class='header'>
           <div class="heading">
-            <h1 class="title">SolidJs-Virtualisation</h1>
+            <h2 class="title">SolidJs-Virtualisation</h2>
             <p class="statement">
               A virtualisating container for Solidjs
             </p>
           </div>
           <div class="menu-bar">
-            <div class="menu">
-              {pages.map((pg) => (
-                <div class="menu-item" onClick={() => openPage(pg)}>
-                  {
-                    ( pg === page()) 
-                    ? <u><p class="menu-text">{pg}</p></u>
-                    : <p class="menu-text">{pg}</p> 
-                  }
-                </div>
-              ))}
+            <div class="menu-container">
+              <div class="menu">
+                {pages.map((pg) => (
+                  <div class="menu-item" onClick={() => openPage(pg)}>
+                    {
+                      ( pg === page()) 
+                      ? <u><p class="menu-text">{pg}</p></u>
+                      : <p class="menu-text">{pg}</p> 
+                    }
+                  </div>
+                ))}
+              </div>
             </div>
             <div class="theme">
               <SolidJsSelect
@@ -66,29 +78,16 @@ const App = () => {
           </div>
 
         </div>
-        <div 
-          class={ "body" + (themeName()===Themes.Dark 
-            ? " dark"
-            : themeName()===Themes.Light
-              ? " light"
-              : themeName()===Themes.Blue
-              ? " blue"
-              : " plain")
-          }
-        >
+        <div class="body">
           <div class="context">
             {
               (page() === 'Example' && <VirtualisationExample theme={themeName()} />)
             }
           </div>
-          <div
-            class="footer"
-            style={{
-              'background-color': 'var(--pageColor2)',
-              color: 'var(--solidjsSelectFontColor)',
-            }}
-          >
-            <p class="no-padding">Created by Mark Gregg</p>
+        </div>
+        <div class="footer-container">
+          <div class="footer">
+            <p>Created by Mark Gregg</p>
           </div>
         </div>
       </div>

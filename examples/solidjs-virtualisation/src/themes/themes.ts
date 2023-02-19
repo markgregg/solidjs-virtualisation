@@ -326,7 +326,7 @@ export const applyTheme = (theme: string) => {
       );
       document.documentElement.style.setProperty(
         '--solidjsSelectDisabledFontColor',
-        'null'
+        'darkgray'
       );
       document.documentElement.style.setProperty(
         '--solidjsSelectDisabledBackgroundColor',
