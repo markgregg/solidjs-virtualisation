@@ -8,6 +8,7 @@ import {
 } from 'solid-js';
 import { Orientation, Vertical } from '../types';
 import Scrollbar, { ScrollBarRef } from '../ScrollBar';
+import MobileScrollbar, { MobileScrollBarRef } from '../MobileScrollbar';
 
 export interface VirtualContainerRef {
   scrollToItem: (item: number) => void;
@@ -34,6 +35,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
 ) => {
   let divRef: HTMLDivElement | undefined = undefined;
   const [scrollBarRef,setScrollBarRef] = createSignal<ScrollBarRef>();
+  const [mobileScrollBarRef,setMobileScrollBarRef] = createSignal<MobileScrollBarRef>();
   const [position, setPosition] = createSignal<number>(0);
   const [wholeItemsPerPage, setWholeItemsPerPage] = createSignal<number>(0);
   const [visibleItems, setVisibleItems] = createSignal<Item[]>([]);
@@ -45,18 +47,19 @@ const VirtualContainer: Component<VirtualContainerProps> = (
     if( props.ref ) {
       const gridRef: VirtualContainerRef = {
         scrollToItem: (item: number) => {
-          if( scrollBarRef() ) {
+          const scrollRef = isMobile() ? mobileScrollBarRef() : scrollBarRef();
+          if( scrollRef ) {
             if (item < position()) {
-              scrollBarRef()?.scrollToItem(item);
+              scrollRef.scrollToItem(item);
             } else if (item >= position() + wholeItemsPerPage() -1 ) {
               if( item >= (props.items.length - wholeItemsPerPage() - 1) ) {
                 const newPosition = props.items.length - wholeItemsPerPage();
                 if( newPosition !== position() ) {
-                  scrollBarRef()?.scrollToItem(newPosition);
+                  scrollRef.scrollToItem(newPosition);
                 }
               } else {
                 const newPosition = position() + (item - (position() + wholeItemsPerPage()-1));
-                scrollBarRef()?.scrollToItem(newPosition);
+                scrollRef.scrollToItem(newPosition);
               }
             }
           }
@@ -131,6 +134,10 @@ const VirtualContainer: Component<VirtualContainerProps> = (
     updateItems(item);
   };
 
+  const isMobile = (): boolean => {
+    return window.matchMedia("only screen and (max-width: 600px)").matches;
+  }
+
   const setFirstElementRef = (ref: HTMLDivElement) => {
     setTimeout(() => {
       if( props.orientation === Vertical ) {
@@ -162,6 +169,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
   };
 
   const verticalContainerStyle: JSX.CSSProperties = {
+    position: 'relative',
     display: 'flex',
     overflow: 'hidden',
     'flex-direction': 'row',
@@ -170,6 +178,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
   };
 
   const horizontalContainerStyle: JSX.CSSProperties = {
+    position: 'relative',
     display: 'flex',
     overflow: 'hidden',
     'flex-direction': 'column',
@@ -209,19 +218,37 @@ const VirtualContainer: Component<VirtualContainerProps> = (
         }
         ref={divRef}
       >
-        <div
-          style={
-            props.orientation === Vertical
-              ? verticalItemListStyle
-              : horizontalItemListStyle
-          }
-        >
-          {visibleItems().map((item, index) => index === 0
-            ?<div ref={setFirstElementRef}>{props.render(item.item, item.index)}</div>
-            :<div>{props.render(item.item, item.index)}</div>
-          )}
-        </div>
-        {!containerLength() && (
+        {
+          isMobile() && 
+            <MobileScrollbar 
+              ref={setMobileScrollBarRef}
+              orientation={props.orientation}
+              itemCount={props.items.length}
+              itemsPerPage={wholeItemsPerPage()}
+              onScroll={handleScroll}
+              itemSize={itemSize()}
+            >
+              {visibleItems().map((item, index) => index === 0
+                ?<div ref={setFirstElementRef}>{props.render(item.item, item.index)}</div>
+                :<div>{props.render(item.item, item.index)}</div>
+              )}  
+            </MobileScrollbar>
+        }
+        {
+          !isMobile() && <div
+            style={
+              props.orientation === Vertical
+                ? verticalItemListStyle
+                : horizontalItemListStyle
+            }
+          > 
+            {visibleItems().map((item, index) => index === 0
+              ?<div ref={setFirstElementRef}>{props.render(item.item, item.index)}</div>
+              :<div>{props.render(item.item, item.index)}</div>
+            )}
+          </div>
+        }
+        {!isMobile() && !containerLength() && (
           <Scrollbar
             ref={setScrollBarRef}
             orientation={props.orientation}

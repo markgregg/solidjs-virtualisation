@@ -13,7 +13,7 @@ export interface ScrollBarRef {
   scrollToItem: (item: number) => void;
 }
 
-export interface ScollBarProps {
+export interface ScrollBarProps {
   ref?: ScrollBarRef | ((ref: ScrollBarRef) => void);
   orientation: Orientation;
   itemCount: number;
@@ -39,7 +39,7 @@ interface ScrollbarState {
   itemsPerPage?: number;
 }
 
-const ScollBar: Component<ScollBarProps> = (props: ScollBarProps) => {
+const ScollBar: Component<ScrollBarProps> = (props: ScrollBarProps) => {
   const arrowLength = 15;
   const arrowLengthAndSpace = 17;
   const barLength = props.hideArrows ? 0 : arrowLengthAndSpace;

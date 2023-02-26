@@ -1,7 +1,7 @@
 import { Component, createEffect, createSignal, onMount } from 'solid-js';
 import './VirtualisationExample.css';
 import Item from '../Item';
-import VirtualContainer, { Orientation } from "solidjs-virtualisation";
+import VirtualContainer, {VirtualContainerRef, Orientation} from "solidjs-virtualisation";
 
 export interface VirtualisationExampleProps {
   theme: string;
@@ -10,10 +10,11 @@ export interface VirtualisationExampleProps {
 const VirtualisationExample: Component<VirtualisationExampleProps> = (
   props: VirtualisationExampleProps
 ) => {
+  let virtualContainerRef: VirtualContainerRef | undefined = undefined;
   const [orientation, setHorizontal] = createSignal<Orientation>('Vertical');
   const [size, setSize] = createSignal<'Fixed' | 'Variable'>('Fixed');
-  const [items, setItems] = createSignal<number[]>([])
-  const [itemCount, setItemCount] = createSignal<number>(10000000)
+  const [items, setItems] = createSignal<number[]>([]);
+  const [itemCount, setItemCount] = createSignal<number>(10000000);
 
   const orientationChanged = () => {
     setHorizontal(orientation() === 'Vertical' ? 'Horizontal' : 'Vertical');
@@ -24,7 +25,6 @@ const VirtualisationExample: Component<VirtualisationExampleProps> = (
   });
 
   createEffect(() => {
-    console.log(`theme = ${props.theme}`); //refresh
     setTimeout( () => {
       orientationChanged();
       orientationChanged();
@@ -46,14 +46,18 @@ const VirtualisationExample: Component<VirtualisationExampleProps> = (
     setItems(items);
   };
 
+  const jump = (index: number) => {
+    virtualContainerRef?.scrollToItem(index <= 0 ? 0 : index-1);
+  };
+
   const sizeChanged = () => {
     setSize(size() === 'Fixed' ? 'Variable' : 'Fixed');
   };
 
   return (
     <div class='main'>
-      <p>SolidJs is fast, because rather than keeping a virtual DOM, it only updates elements in response to a reaction. 
-        The SolidJs-Select control renders options in response to a single reaction. This would typically cause SolidJs a lot of work.
+      <p>Rather using a virtual DOM, SolidJS only updates elements in response to a reaction. 
+        The SolidJs-Select control renders all options in response to a single reaction. This would cause SolidJs a lot of work.
         I've overcome the problem by virtualising the options, so only visible items are rendered.
       </p>
       <div class='settings'>
@@ -61,6 +65,7 @@ const VirtualisationExample: Component<VirtualisationExampleProps> = (
           <p class='entry'>Orientation</p>
           <p class='entry'>Item Size</p>
           <p class='entry'>Item count</p>
+          <p class='entry'>Jump to item</p>
         </div>
         <div class='columns'>
           <p class='entryValue' onClick={orientationChanged}>{orientation()}</p>
@@ -73,11 +78,19 @@ const VirtualisationExample: Component<VirtualisationExampleProps> = (
             value={itemCount()}
             onChange={e => createItems(Number((e.target as HTMLInputElement).value))}
           />
+          <input 
+            class='jumpInput' 
+            type="number" 
+            min="1" 
+            max={itemCount()}
+            onChange={e => jump(Number((e.target as HTMLInputElement).value))}
+          />
         </div>
       </div>
       <div class='containerCenter'>
         <div class={ orientation() === 'Horizontal' ? 'contentHorizontal' : 'contentVertical'}>
           <VirtualContainer
+            ref={virtualContainerRef}
             orientation={orientation()}
             items={items()}
             render={(item: any) => (

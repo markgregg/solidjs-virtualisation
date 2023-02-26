@@ -21,7 +21,7 @@
 .columns {
   display: flex;
   flex-direction: column;
-  row-gap: 5px;
+  row-gap: 8px;
 }
 
 .entry {
@@ -57,7 +57,7 @@
 
 @media only screen and (max-width: 600px) {
   .contentVertical {
-    height: 240px;
+    height: 220px;
     width: 200px;
   }
   .contentHorizontal {
