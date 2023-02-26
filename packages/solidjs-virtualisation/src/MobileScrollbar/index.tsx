@@ -26,6 +26,7 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
   let containerDivRef: HTMLDivElement | undefined = undefined;
   const [size,setSize] = createSignal(0)
   const [factor,setFactor] = createSignal(1)
+  const [top,setTop] = createSignal(0)
   
   onMount(() => {
     if( props.ref ) {
@@ -59,11 +60,11 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
     return orientation === Vertical
     ? {
         height: `${size}px`,
-        width: '100%'
+        width: '1px'
       }
     : {
         width: `${size}px`,
-        height: '100%'
+        height: '1px'
       };
   }
 
@@ -75,6 +76,7 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
         ? (props.itemCount-(props.itemsPerPage ?? 1)) 
         : position * factor() ;
       props.onScroll(item);
+      setTop(element.scrollTop);
     }
   }
 
@@ -86,15 +88,14 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
           height: '100%',
           width: '100%',
           overflow: 'auto',
-          'z-index': 1
+          position: 'relative'
         }}
         onScroll={scrolled}
       >
         <div
           style={scrollAreaStyle(props.orientation, size())}
         />
-      </div>
-      <div
+        <div
         style={{
           height: '100%',
           width: '100%',
@@ -102,6 +103,8 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
           position: 'absolute',
           display: 'flex',
           'row-gap': '2px',
+          "z-index": 1,
+          top: `${top()}px`,
           'flex-direction': props.orientation === Vertical ? 'column' : 'row'
         }}
       >
@@ -109,6 +112,7 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
         props.children.map( child => child)
       }
       </div>  
+      </div>
     </>
   );
 };
