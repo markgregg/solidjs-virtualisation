@@ -47,7 +47,7 @@ const VirtualisationExample: Component<VirtualisationExampleProps> = (
   };
 
   const jump = (index: number) => {
-    virtualContainerRef?.scrollToItem(index <= 0 ? 0 : index-1);
+    virtualContainerRef?.scrollToItem(index <= 0 ? 0 : index);
   };
 
   const sizeChanged = () => {

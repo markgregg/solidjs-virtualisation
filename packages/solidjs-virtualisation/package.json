@@ -1,6 +1,6 @@
 {
   "name": "solidjs-virtualisation",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "description": "Virtualised container for solidJs",
   "type": "module",
   "files": [

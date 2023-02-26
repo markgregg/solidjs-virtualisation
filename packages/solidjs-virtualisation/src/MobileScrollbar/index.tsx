@@ -26,13 +26,13 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
   let containerDivRef: HTMLDivElement | undefined = undefined;
   const [size,setSize] = createSignal(0)
   const [factor,setFactor] = createSignal(1)
-
+  
   onMount(() => {
     if( props.ref ) {
       const ref: MobileScrollBarRef = {
         scrollToItem: (item: number) => {
-          const x = props.orientation === Vertical ? 0 : (item-1) / factor();
-          const y = props.orientation === Horizontal ? 0 : (item-1) / factor();
+          const x = props.orientation === Vertical ? 0 : (item) / factor();
+          const y = props.orientation === Horizontal ? 0 : (item) / factor();
           containerDivRef?.scrollTo(x,y);
         }
       }
@@ -71,7 +71,9 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
     const element = event?.target as HTMLDivElement;
     if( element )  {
       const position = props.orientation === Vertical ? element.scrollTop : element.scrollLeft;
-      const item = position * factor() > (props.itemCount-(props.itemsPerPage ?? 1)) ? (props.itemCount-(props.itemsPerPage ?? 1)) : position * factor() ;
+      const item = position * factor() > (props.itemCount-(props.itemsPerPage ?? 1)) 
+        ? (props.itemCount-(props.itemsPerPage ?? 1)) 
+        : position * factor() ;
       props.onScroll(item);
     }
   }
@@ -99,6 +101,7 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
           overflow: 'hidden',
           position: 'absolute',
           display: 'flex',
+          'row-gap': '2px',
           'flex-direction': props.orientation === Vertical ? 'column' : 'row'
         }}
       >

@@ -50,7 +50,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
           const scrollRef = isMobile() ? mobileScrollBarRef() : scrollBarRef();
           if( scrollRef ) {
             if (item < position()) {
-              scrollRef.scrollToItem(item);
+              scrollRef.scrollToItem(item > 0 ? item : 0);
             } else if (item >= position() + wholeItemsPerPage() -1 ) {
               if( item >= (props.items.length - wholeItemsPerPage() - 1) ) {
                 const newPosition = props.items.length - wholeItemsPerPage();
@@ -58,7 +58,7 @@ const VirtualContainer: Component<VirtualContainerProps> = (
                   scrollRef.scrollToItem(newPosition);
                 }
               } else {
-                const newPosition = position() + (item - (position() + wholeItemsPerPage()-1));
+                const newPosition = item - wholeItemsPerPage() + 1;
                 scrollRef.scrollToItem(newPosition);
               }
             }
