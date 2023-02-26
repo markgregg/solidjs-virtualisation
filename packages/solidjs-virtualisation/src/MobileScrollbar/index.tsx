@@ -26,7 +26,7 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
   let containerDivRef: HTMLDivElement | undefined = undefined;
   const [size,setSize] = createSignal(0)
   const [factor,setFactor] = createSignal(1)
-  const [top,setTop] = createSignal(0)
+  const [position,setPosition] = createSignal(0)
   
   onMount(() => {
     if( props.ref ) {
@@ -76,7 +76,7 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
         ? (props.itemCount-(props.itemsPerPage ?? 1)) 
         : position * factor() ;
       props.onScroll(item);
-      setTop(element.scrollTop);
+      setPosition(position);
     }
   }
 
@@ -104,7 +104,8 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
           display: 'flex',
           'row-gap': '2px',
           "z-index": 1,
-          top: `${top()}px`,
+          top: props.orientation === Vertical ? `${position()}px` : 0,
+          left: props.orientation === Horizontal ? `${position()}px` : 0,
           'flex-direction': props.orientation === Vertical ? 'column' : 'row'
         }}
       >
