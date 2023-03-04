@@ -5,6 +5,7 @@ import {
   JSXElement,
   createEffect,
   JSX,
+  For,
 } from 'solid-js';
 import { Orientation, Vertical } from '../types';
 import Scrollbar, { ScrollBarRef } from '../ScrollBar';
@@ -228,10 +229,11 @@ const VirtualContainer: Component<VirtualContainerProps> = (
               onScroll={handleScroll}
               itemSize={itemSize()}
             >
-              {visibleItems().map((item, index) => index === 0
+              <For each={visibleItems()}>
+                { (item, index) => index() === 0
                 ?<div ref={setFirstElementRef}>{props.render(item.item, item.index)}</div>
-                :<div>{props.render(item.item, item.index)}</div>
-              )}  
+                :<div>{props.render(item.item, item.index)}</div>}
+              </For>
             </MobileScrollbar>
         }
         {
@@ -242,10 +244,11 @@ const VirtualContainer: Component<VirtualContainerProps> = (
                 : horizontalItemListStyle
             }
           > 
-            {visibleItems().map((item, index) => index === 0
+            <For each={visibleItems()}>
+              { (item, index) => index() === 0
               ?<div ref={setFirstElementRef}>{props.render(item.item, item.index)}</div>
-              :<div>{props.render(item.item, item.index)}</div>
-            )}
+              :<div>{props.render(item.item, item.index)}</div>}
+            </For>
           </div>
         }
         {!isMobile() && !containerLength() && (

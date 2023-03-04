@@ -56,9 +56,9 @@ const VirtualisationExample: Component<VirtualisationExampleProps> = (
 
   return (
     <div class='main'>
-      <p>Rather using a virtual DOM, SolidJS only updates elements in response to a reaction. 
-        The SolidJs-Select control renders all options in response to a single reaction. This would cause SolidJs a lot of work.
-        I've overcome the problem by virtualising the options, so only visible items are rendered.
+      <p>Rather using a virtual DOM, SolidJS singals only cause renders  where the signal's values are used. 
+        That is great in terms of reactivity, but doesn't help when we have thousands or millions of items. 
+        Solidjs-virtualisation overcomes the problem by only rendering visible items.
       </p>
       <div class='settings'>
         <div class='columns'>

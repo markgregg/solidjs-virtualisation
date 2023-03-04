@@ -2,6 +2,7 @@ import {
   Component,
   createEffect,
   createSignal,
+  For,
   JSX,
   onMount
 } from 'solid-js';
@@ -18,7 +19,7 @@ export interface MobileScrollBarProps {
   itemSize: number;
   itemsPerPage?: number;
   onScroll: (item: number) => void;
-  children: JSX.Element[];
+  children: JSX.Element;
 }
 
 const maxSize = 32767;
@@ -47,13 +48,15 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
   });
 
   createEffect(() => {
-    const contianerHeight = (props.orientation === Vertical ? containerDivRef?.clientHeight : containerDivRef?.clientWidth) ?? 0;
-    let sizeFactor = 1;
-    while( ((props.itemCount-(props.itemsPerPage ?? 1)) / sizeFactor ) + contianerHeight > maxSize ) {
-      sizeFactor = sizeFactor * 10;
+    if( containerDivRef ) {
+      const contianerSize = (props.orientation === Vertical ? containerDivRef.clientHeight : containerDivRef.clientWidth)+1;
+      let sizeFactor = 1;
+      while( ((props.itemCount-(props.itemsPerPage ?? 1)) / sizeFactor ) + contianerSize > maxSize ) {
+        sizeFactor = sizeFactor * 10;
+      }
+      setFactor(sizeFactor)
+      setSize((props.itemCount-(props.itemsPerPage ?? 1)) / sizeFactor + contianerSize );
     }
-    setFactor(sizeFactor)
-    setSize((props.itemCount-(props.itemsPerPage ?? 1)) / sizeFactor + contianerHeight );
   });
   
   const scrollAreaStyle = (orientation: Orientation, size: number) => {
@@ -109,9 +112,7 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
           'flex-direction': props.orientation === Vertical ? 'column' : 'row'
         }}
       >
-      {
-        props.children.map( child => child)
-      }
+          { props.children }
       </div>  
       </div>
     </>
