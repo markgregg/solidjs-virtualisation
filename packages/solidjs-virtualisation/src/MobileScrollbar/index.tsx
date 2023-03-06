@@ -91,7 +91,8 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
           height: '100%',
           width: '100%',
           overflow: 'auto',
-          position: 'relative'
+          position: 'relative',
+          "z-index": 99,
         }}
         onScroll={scrolled}
       >
@@ -106,7 +107,6 @@ const MobileScrollbar: Component<MobileScrollBarProps> = (props: MobileScrollBar
           position: 'absolute',
           display: 'flex',
           'row-gap': '2px',
-          "z-index": 1,
           top: props.orientation === Vertical ? `${position()}px` : 0,
           left: props.orientation === Horizontal ? `${position()}px` : 0,
           'flex-direction': props.orientation === Vertical ? 'column' : 'row'
